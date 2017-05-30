@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>bszeti.dropwizard</groupId>
+  <artifactId>parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+
+  <packaging>pom</packaging>
+
+  <name>Dropwizard Example</name>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- dependency versions -->
+    <dropwizard.version>1.1.0</dropwizard.version>
+    <swagger.version>1.5.13</swagger.version>
+    <swaggerUI.version>1.1.0-1</swaggerUI.version>
+    <commons-io.version>2.4</commons-io.version>
+    <!-- <awaitility.version></awaitility.version> -->
+
+    <!-- plugin versions -->
+    <jar.version>2.6</jar.version>
+    <compiler.version>3.3</compiler.version>
+    <resources.version>2.6</resources.version>
+    <surefire.version>2.19.1</surefire.version>
+    <source.version>2.4</source.version>
+    <shade.version>2.4.1</shade.version>
+  </properties>
+
+  <modules>
+    <module>dwexample-api</module>
+    <module>dwexample-application</module>
+    <module>dwexample-client</module>
+  </modules>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${compiler.version}</version>
+          <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>${source.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>${resources.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${surefire.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${jar.version}</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-shade-plugin</artifactId>
+          <version>${shade.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- project artifacts -->
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>dwexample-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>dwexample-client</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+
+      <!-- dependencies -->
+      <dependency>
+        <groupId>io.dropwizard</groupId>
+        <artifactId>dropwizard-bom</artifactId>
+        <version>${dropwizard.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.swagger</groupId>
+        <artifactId>swagger-annotations</artifactId>
+        <version>${swagger.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.smoketurner</groupId>
+        <artifactId>dropwizard-swagger</artifactId>
+        <version>${swaggerUI.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>commons-io</groupId>
+        <artifactId>commons-io</artifactId>
+        <version>${commons-io.version}</version>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+</project>
