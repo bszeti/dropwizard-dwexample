@@ -13,6 +13,7 @@ import bszeti.dw.example.application.config.DwExampleConfiguration;
 import bszeti.dw.example.application.health.BuildInfoHealthCheck;
 import bszeti.dw.example.application.health.FileSystemHealthCheck;
 import bszeti.dw.example.application.resources.HelloService;
+import bszeti.dw.example.application.resources.MultithreadedExecutorService;
 import bszeti.dw.example.application.rs.ConstraintViolationExceptionMapper;
 import bszeti.dw.example.application.rs.ExceptionMapper;
 import bszeti.dw.example.application.rs.JsonProcessingExceptionMapper;
@@ -20,7 +21,6 @@ import bszeti.dw.example.application.rs.WebApplicationExceptionMapper;
 import bszeti.dw.example.application.task.ExecutionThreadServiceManager;
 import bszeti.dw.example.application.task.ScheduledTask;
 import io.dropwizard.Application;
-
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -69,6 +69,7 @@ public class DwExampleApplication extends Application<DwExampleConfiguration> {
     	
     	//Add resources
     	environment.jersey().register(new HelloService(config.getGreetings()));
+    	environment.jersey().register(new MultithreadedExecutorService(3));
     	
     	//Add background tasks
     	environment.lifecycle().manage(new ScheduledTask(2000));
