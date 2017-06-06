@@ -1,4 +1,4 @@
-package bszeti.dw.example.application;
+package bszeti.dwexample.application;
 
 
 import org.eclipse.jetty.servlet.DefaultServlet;
@@ -7,19 +7,20 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
-import bszeti.dw.example.application.config.DwExampleConfiguration;
-import bszeti.dw.example.application.health.BuildInfoHealthCheck;
-import bszeti.dw.example.application.health.FileSystemHealthCheck;
-import bszeti.dw.example.application.resources.HelloService;
-import bszeti.dw.example.application.resources.MultithreadedExecutorService;
-import bszeti.dw.example.application.rs.ConstraintViolationExceptionMapper;
-import bszeti.dw.example.application.rs.ExceptionMapper;
-import bszeti.dw.example.application.rs.JsonProcessingExceptionMapper;
-import bszeti.dw.example.application.rs.WebApplicationExceptionMapper;
-import bszeti.dw.example.application.task.ExecutionThreadServiceManager;
-import bszeti.dw.example.application.task.ScheduledTask;
+import bszeti.dwexample.application.config.DwExampleConfiguration;
+import bszeti.dwexample.application.health.BuildInfoHealthCheck;
+import bszeti.dwexample.application.health.FileSystemHealthCheck;
+import bszeti.dwexample.application.resources.HelloService;
+import bszeti.dwexample.application.resources.MultithreadedExecutorService;
+import bszeti.dwexample.application.rs.ConstraintViolationExceptionMapper;
+import bszeti.dwexample.application.rs.ExceptionMapper;
+import bszeti.dwexample.application.rs.JsonProcessingExceptionMapper;
+import bszeti.dwexample.application.rs.WebApplicationExceptionMapper;
+import bszeti.dwexample.application.task.ExecutionThreadServiceManager;
+import bszeti.dwexample.application.task.ScheduledTask;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -52,7 +53,8 @@ public class DwExampleApplication extends Application<DwExampleConfiguration> {
     	//Modify Jackson object mapper with features.
     	//A Dropwizard style objectmapper can be created using  io.dropwizard.jackson.Jackson.newObjectMapper();
     	environment.getObjectMapper().enable(JsonParser.Feature.IGNORE_UNDEFINED); //Ignore unknown fields
-    	environment.getObjectMapper().enable(SerializationFeature.WRAP_ROOT_VALUE); //For @JsonRootName
+    	environment.getObjectMapper().enable(SerializationFeature.WRAP_ROOT_VALUE); //To marshal with  @JsonRootName
+    	environment.getObjectMapper().enable(DeserializationFeature.UNWRAP_ROOT_VALUE); //To unmarshal with @JsonRootName
     	environment.getObjectMapper().disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); //Required for nice LocalDate marshaling
     	environment.getObjectMapper().setSerializationInclusion(Include.NON_NULL); //Skip nulls
 

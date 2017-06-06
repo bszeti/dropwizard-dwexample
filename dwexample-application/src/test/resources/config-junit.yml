@@ -1,0 +1,27 @@
+server:
+  type: simple
+  connector:
+    type: http
+    port: 8080
+    bindHost: 127.0.0.1
+  
+  #If want to use our own exception mappers
+  registerDefaultExceptionMappers: false
+
+  #Disable the requestLog on console
+  requestLog:
+    appenders: []
+
+logging:
+  level: INFO
+  loggers:
+    bszeti.dropwizard.dwexample: DEBUG
+
+tempDir: /tmp
+greetings:
+ - lang: en
+   pattern: Hello %s!
+ - lang: es
+   pattern: ¡Hola %s!
+ - lang: hu
+   pattern: Szia %s!

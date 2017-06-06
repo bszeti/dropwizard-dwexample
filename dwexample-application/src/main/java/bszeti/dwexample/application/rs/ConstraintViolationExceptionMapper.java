@@ -1,6 +1,8 @@
-package bszeti.dw.example.application.rs;
+package bszeti.dwexample.application.rs;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
@@ -22,9 +24,11 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
 	public Response toResponse(ConstraintViolationException exception) {
 		log.error("Validation error", exception);
 		//Concat the list of validation errors
-		String errors = exception.getConstraintViolations().stream()
-		.map(ConstraintViolation::getMessage)
-		.collect(Collectors.joining("; "));
+		
+		String errors = Optional.ofNullable(exception.getConstraintViolations()).orElseGet(Collections::emptySet)
+				.stream()
+				.map(ConstraintViolation::getMessage)
+				.collect(Collectors.joining("; "));
 		
 		return Response
 				.status(Response.Status.BAD_REQUEST)

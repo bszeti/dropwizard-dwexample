@@ -1,11 +1,11 @@
-package bszeti.dw.example.application.resources;
+package bszeti.dwexample.application.resources;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -22,9 +22,9 @@ import com.google.common.collect.ImmutableMap;
 import bszeti.dw.example.api.HelloRequest;
 import bszeti.dw.example.api.HelloResponse;
 import bszeti.dw.example.api.HelloResponseStatus;
-import bszeti.dw.example.application.config.Greeting;
+import bszeti.dwexample.application.config.Greeting;
 
-@Path("hello")
+@Path(HelloRequest.HELLO_PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class HelloService {
@@ -61,7 +61,7 @@ public class HelloService {
 		} else {
 			//Return only the lang given. This will throw an exception if lang is not set.
 			String pattern = greetings.get(lang);
-			if (pattern == null) throw new Exception("Unknow lang");
+			if (pattern == null) throw new ConstraintViolationException("Unknow lang",null);
 			answer = ImmutableMap.of(lang, String.format(pattern, name));
 		}
 		

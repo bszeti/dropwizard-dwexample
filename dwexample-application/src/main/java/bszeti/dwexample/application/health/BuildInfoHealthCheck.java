@@ -1,4 +1,4 @@
-package bszeti.dw.example.application.health;
+package bszeti.dwexample.application.health;
 
 import java.io.File;
 import java.util.jar.Manifest;

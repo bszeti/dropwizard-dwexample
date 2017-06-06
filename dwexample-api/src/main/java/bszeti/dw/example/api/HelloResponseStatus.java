@@ -13,11 +13,15 @@ public class HelloResponseStatus {
 	@JsonProperty
 	LocalDateTime time;
 	
+	public HelloResponseStatus(){
+		//Default constructor is needed by Jackson for unmarshaling
+	}
 	public HelloResponseStatus(Integer code, String message, LocalDateTime time){
 		this.code=code;
 		this.message = message;
 		this.time = time;
 	}
+	
 
 	public Integer getCode() {
 		return code;

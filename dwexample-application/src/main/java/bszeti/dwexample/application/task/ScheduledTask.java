@@ -1,4 +1,4 @@
-package bszeti.dw.example.application.task;
+package bszeti.dwexample.application.task;
 
 import java.util.concurrent.TimeUnit;
 

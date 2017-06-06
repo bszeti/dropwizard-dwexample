@@ -1,4 +1,4 @@
-package bszeti.dw.example.application.config;
+package bszeti.dwexample.application.config;
 
 import javax.validation.constraints.Pattern;
 

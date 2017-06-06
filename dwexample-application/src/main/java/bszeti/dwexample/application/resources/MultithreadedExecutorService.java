@@ -1,4 +1,4 @@
-package bszeti.dw.example.application.resources;
+package bszeti.dwexample.application.resources;
 
 import java.util.ArrayList;
 import java.util.List;

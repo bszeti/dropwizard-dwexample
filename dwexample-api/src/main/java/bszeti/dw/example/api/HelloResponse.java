@@ -14,6 +14,10 @@ public class HelloResponse {
 	@JsonProperty
 	Map<String,String> greetings;
 	
+	public HelloResponse() {
+		//Default constructor is needed by Jackson for unmarshaling
+	}
+	
 	public HelloResponse(HelloResponseStatus helloResponseStatus) {
 		this.helloResponseStatus = helloResponseStatus;
 	}

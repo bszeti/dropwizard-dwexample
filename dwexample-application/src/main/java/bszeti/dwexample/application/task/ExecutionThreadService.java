@@ -1,4 +1,4 @@
-package bszeti.dw.example.application.task;
+package bszeti.dwexample.application.task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

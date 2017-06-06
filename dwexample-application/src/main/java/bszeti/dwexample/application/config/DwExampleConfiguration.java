@@ -1,6 +1,6 @@
-package bszeti.dw.example.application.config;
+package bszeti.dwexample.application.config;
 
-import static bszeti.dw.example.application.DwExampleApplication.DEFAULT_TEMPDIR;
+import static bszeti.dwexample.application.DwExampleApplication.DEFAULT_TEMPDIR;
 
 import java.util.List;
 

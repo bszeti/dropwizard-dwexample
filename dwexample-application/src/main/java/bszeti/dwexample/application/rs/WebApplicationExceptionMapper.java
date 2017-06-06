@@ -1,4 +1,4 @@
-package bszeti.dw.example.application.rs;
+package bszeti.dwexample.application.rs;
 
 import java.time.LocalDateTime;
 

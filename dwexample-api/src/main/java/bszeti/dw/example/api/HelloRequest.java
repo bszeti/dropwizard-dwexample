@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class HelloRequest {
+	public static final String HELLO_PATH="hello";
 	
 	@JsonProperty
 	@NotEmpty(message="name is required")
