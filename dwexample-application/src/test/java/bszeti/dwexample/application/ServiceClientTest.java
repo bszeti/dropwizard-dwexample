@@ -39,7 +39,15 @@ public class ServiceClientTest {
 		ServiceClientConfiguration config = new ServiceClientConfiguration();
 		config.setUrl(url);
 		JerseyClientConfiguration jerseyClientConfiguration = new JerseyClientConfiguration();
-		jerseyClientConfiguration.setTimeout(Duration.seconds(10));
+		jerseyClientConfiguration.setTimeout(Duration.seconds(1));
+		jerseyClientConfiguration.setConnectionTimeout(Duration.seconds(1));
+		jerseyClientConfiguration.setConnectionRequestTimeout(Duration.seconds(5));
+		jerseyClientConfiguration.setKeepAlive(Duration.seconds(5)); //The keepAlive must be less than the server side idleTimeout (usually 30 sec)
+		//Async executorservice
+		jerseyClientConfiguration.setMinThreads(5);
+		jerseyClientConfiguration.setMaxThreads(5);
+		jerseyClientConfiguration.setWorkQueueSize(16*1024);
+		
 		config.setJerseyClientConfiguration(jerseyClientConfiguration);
 		
 		//Create clients
@@ -48,8 +56,41 @@ public class ServiceClientTest {
 	}
 	
 	@Test
-	public void sayGreetingGet() throws ServiceClientException {
+	public void sayGreetingGet() throws Exception {
 		HelloResponse response = clientDropwizard.sayGreetingsGet("TEST", "en");
+		HelloResponseStatus status = response.getHelloResponseStatus();
+		assertEquals(0, status.getCode().intValue());
+		assertEquals("OK", status.getMessage());
+		assertTrue(java.time.Duration.between(LocalDateTime.now(), status.getTime()).abs().getSeconds()<10);
+		assertEquals(1,response.getGreetings().size());
+		assertEquals("Hello TEST!", response.getGreetings().get("en"));
+	}
+	
+	@Test
+	public void sayGreetingGetJerseyClient() throws Exception {
+		HelloResponse response = clientJersey.sayGreetingsGet("TEST", "en");
+		HelloResponseStatus status = response.getHelloResponseStatus();
+		assertEquals(0, status.getCode().intValue());
+		assertEquals("OK", status.getMessage());
+		assertTrue(java.time.Duration.between(LocalDateTime.now(), status.getTime()).abs().getSeconds()<10);
+		assertEquals(1,response.getGreetings().size());
+		assertEquals("Hello TEST!", response.getGreetings().get("en"));
+	}
+	
+	@Test
+	public void sayGreetingGetAsync() throws Exception {
+		HelloResponse response = clientDropwizard.sayGreetingsGetAsync("TEST", "en").get();
+		HelloResponseStatus status = response.getHelloResponseStatus();
+		assertEquals(0, status.getCode().intValue());
+		assertEquals("OK", status.getMessage());
+		assertTrue(java.time.Duration.between(LocalDateTime.now(), status.getTime()).abs().getSeconds()<10);
+		assertEquals(1,response.getGreetings().size());
+		assertEquals("Hello TEST!", response.getGreetings().get("en"));
+	}
+	
+	@Test
+	public void sayGreetingGetAsyncJerseyClient() throws Exception {
+		HelloResponse response = clientJersey.sayGreetingsGetAsync("TEST", "en").get();
 		HelloResponseStatus status = response.getHelloResponseStatus();
 		assertEquals(0, status.getCode().intValue());
 		assertEquals("OK", status.getMessage());
@@ -63,6 +104,18 @@ public class ServiceClientTest {
 		ServiceClientException serviceClientException = null;
 		try{
 			clientDropwizard.sayGreetingsGet("TEST", "xx");
+		} catch (ServiceClientException ex){
+			serviceClientException = ex;
+		}
+		assertEquals(false, serviceClientException.isRecoverable());
+		assertEquals("Bad Request", serviceClientException.getMessage());
+	}
+	
+	@Test
+	public void sayGreetingGetWrongLangJerseyClient() {
+		ServiceClientException serviceClientException = null;
+		try{
+			clientJersey.sayGreetingsGet("TEST", "xx");
 		} catch (ServiceClientException ex){
 			serviceClientException = ex;
 		}
@@ -85,6 +138,20 @@ public class ServiceClientTest {
 	}
 	
 	@Test
+	public void sayGreetingPostJerseyClient() throws ServiceClientException {
+		HelloRequest request = new HelloRequest();
+		request.setName("TEST");
+		request.setLang("en");
+		HelloResponse response = clientJersey.sayGreetingsPost(request);
+		HelloResponseStatus status = response.getHelloResponseStatus();
+		assertEquals(0, status.getCode().intValue());
+		assertEquals("OK", status.getMessage());
+		assertTrue(java.time.Duration.between(LocalDateTime.now(), status.getTime()).abs().getSeconds()<10);
+		assertEquals(1,response.getGreetings().size());
+		assertEquals("Hello TEST!", response.getGreetings().get("en"));
+	}
+	
+	@Test
 	public void sayGreetingPostWrongLang() {
 		ServiceClientException serviceClientException = null;
 		HelloRequest request = new HelloRequest();
@@ -92,6 +159,21 @@ public class ServiceClientTest {
 		request.setLang("xx");
 		try{
 			clientDropwizard.sayGreetingsPost(request);
+		} catch (ServiceClientException ex){
+			serviceClientException = ex;
+		}
+		assertEquals(false, serviceClientException.isRecoverable());
+		assertEquals("Bad Request", serviceClientException.getMessage());
+	}
+	
+	@Test
+	public void sayGreetingPostWrongLangJerseyClient() {
+		ServiceClientException serviceClientException = null;
+		HelloRequest request = new HelloRequest();
+		request.setName("TEST");
+		request.setLang("xx");
+		try{
+			clientJersey.sayGreetingsPost(request);
 		} catch (ServiceClientException ex){
 			serviceClientException = ex;
 		}

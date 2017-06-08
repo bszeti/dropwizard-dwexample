@@ -17,6 +17,9 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.google.common.collect.ImmutableMap;
 
 import bszeti.dw.example.api.HelloRequest;
@@ -28,6 +31,7 @@ import bszeti.dwexample.application.config.Greeting;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class HelloService {
+	private static final Logger log = LoggerFactory.getLogger(HelloService.class);
 	
 	private Map<String,String> greetings;
 
@@ -39,12 +43,14 @@ public class HelloService {
 	@GET
 	@Path("/{name}")
 	public Response sayGreetingsGet(@PathParam("name") String name, @QueryParam("lang") String lang) throws Exception {
+		log.info("sayGreetingsGet {} {}",name, lang);
 		return sayGreetings(name,lang);
 	}
 	
 	@POST
 	@Path("/")
 	public Response sayGreetingsPost(@Valid HelloRequest helloRequest) throws Exception{
+		log.info("sayGreetingsPost {} {}",helloRequest.getName(), helloRequest.getLang());
 		return sayGreetings(helloRequest.getName(),helloRequest.getLang());
 	}
 
