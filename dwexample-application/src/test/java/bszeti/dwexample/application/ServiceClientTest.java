@@ -43,6 +43,7 @@ public class ServiceClientTest {
 		jerseyClientConfiguration.setConnectionTimeout(Duration.seconds(1));
 		jerseyClientConfiguration.setConnectionRequestTimeout(Duration.seconds(5));
 		jerseyClientConfiguration.setKeepAlive(Duration.seconds(5)); //The keepAlive must be less than the server side idleTimeout (usually 30 sec)
+		jerseyClientConfiguration.setRetries(2);
 		//Async executorservice
 		jerseyClientConfiguration.setMinThreads(5);
 		jerseyClientConfiguration.setMaxThreads(5);

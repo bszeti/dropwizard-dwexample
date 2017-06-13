@@ -41,6 +41,8 @@ import bszeti.dw.example.api.HelloResponse;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.jackson.Jackson;
 import io.dropwizard.setup.Environment;
+import jersey.repackaged.com.google.common.util.concurrent.Futures;
+import jersey.repackaged.com.google.common.util.concurrent.UncheckedExecutionException;
 
 /**
  * Helper class to create a client for our service. This can be used in another Java project that calls the service.
@@ -185,45 +187,23 @@ public class ServiceClient {
 	}
 	
 	//Operations - Methods to call the remote http service
-	public Future<HelloResponse> sayGreetingsGetAsync(String name, String lang) throws ServiceClientException{
-		Future<Response> response = target
+	public Future<HelloResponse> sayGreetingsGetAsync(String name, String lang) {
+		Future<Response> futureResponse = target
 				.path(name)
 				.queryParam("lang", lang)
 				.request(MediaType.APPLICATION_JSON)
 				.async()
 				.get();
-		return new Future<HelloResponse>(){
-			@Override
-			public boolean cancel(boolean mayInterruptIfRunning) {
-				return response.cancel(mayInterruptIfRunning);
+		
+		//Process the Response to HelloResponse when .get() is called
+		//checked exceptions are not allowed
+		return Futures.lazyTransform(futureResponse, (r)-> {
+			try {
+				return processResponse(r);
+			} catch (ServiceClientException ex) {
+				throw new UncheckedExecutionException(ex);
 			}
-			@Override
-			public boolean isCancelled() {
-				return response.isCancelled();
-			}
-			@Override
-			public boolean isDone() {
-				return response.isDone();
-			}
-			@Override
-			public HelloResponse get() throws InterruptedException, ExecutionException {
-				try {
-					return processResponse(response.get());
-				} catch (ServiceClientException e) {
-					throw new ExecutionException(e);
-				}
-			}
-			@Override
-			public HelloResponse get(long timeout, TimeUnit unit)
-					throws InterruptedException, ExecutionException, TimeoutException {
-				try {
-					return processResponse(response.get(timeout,unit));
-				} catch (ServiceClientException e) {
-					throw new ExecutionException(e);
-				}
-			}
-			
-		};
+		});
 	}
 	
 	public HelloResponse sayGreetingsPost(HelloRequest request) throws ServiceClientException{
