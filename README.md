@@ -6,7 +6,8 @@ An example project using the [Dropwizard Java REST framework](http://www.dropwiz
 - Healthcheck with build info
 - Customize Jackson ObjectMapper
 - Custom exception mappers
-- Add default (listing) servlet to admin 
+- Add default (listing) servlet to admin
+- AssetsBundle to serve static content
 - Scheuled task (Dropwizard managed)
 - Service manager for a service running on multiple threads (Dropwizard managed)
 - Request response processed by multiple threads (using ListeningExecutorService)
