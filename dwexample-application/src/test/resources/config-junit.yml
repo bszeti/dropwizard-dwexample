@@ -1,5 +1,7 @@
 server:
   type: simple
+  adminContextPath: /admin
+  applicationContextPath: /app
   connector:
     type: http
     port: 8080

@@ -22,6 +22,7 @@ import bszeti.dwexample.application.rs.WebApplicationExceptionMapper;
 import bszeti.dwexample.application.task.ExecutionThreadServiceManager;
 import bszeti.dwexample.application.task.ScheduledTask;
 import io.dropwizard.Application;
+import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
@@ -41,11 +42,21 @@ public class DwExampleApplication extends Application<DwExampleConfiguration> {
     
     @Override
     public void initialize(final Bootstrap<DwExampleConfiguration> bootstrap) {
+    	//Serve files at /src/main/resources/assets at url /[applicationContext]/static
+    	//The asset servlet mapping path must be different than for Jersey resources (which "/") 
+    	//The third parameter is the default file to serve
+    	bootstrap.addBundle(new AssetsBundle("/assets", "/static", "index.html"));
 
     }
 
     @Override
 	public void run(DwExampleConfiguration config, Environment environment) throws Exception {
+    	//It's possible to change the url prefix for all the registered Jersey resources. This has no impact on assets url.
+    	//The resources would be served at [applicationContext]/api/...
+    	//In might be useful to strictly separate APIs from assets under a different url path.
+    	//The default "/" works well in this case.
+    	//environment.jersey().setUrlPattern("/api");
+    	
     	//Add health checks
     	environment.healthChecks().register("tempDir", new FileSystemHealthCheck(config.getTempDirPath()));
     	environment.healthChecks().register("buildInfo", new BuildInfoHealthCheck());

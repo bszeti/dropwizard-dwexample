@@ -1,6 +1,16 @@
 server:
   type: default
-  maxThreads: 1024
+  #http://localhost:8081/admin
+  adminContextPath: /admin
+  #http://localhost:8080/app/hello/
+  #http://localhost:8080/app/static/index.html
+  applicationContextPath: /app
+  applicationConnectors:
+    - type: http
+      port: 8080
+  adminConnectors:
+    - type: http
+      port: 8081
 
   #If want to use our own exception mappers
   registerDefaultExceptionMappers: false
