@@ -66,7 +66,7 @@ public class DwExampleApplication extends Application<DwExampleConfiguration> {
     	environment.getObjectMapper().enable(JsonParser.Feature.IGNORE_UNDEFINED); //Ignore unknown fields
     	environment.getObjectMapper().enable(SerializationFeature.WRAP_ROOT_VALUE); //To marshal with  @JsonRootName
     	environment.getObjectMapper().enable(DeserializationFeature.UNWRAP_ROOT_VALUE); //To unmarshal with @JsonRootName
-    	environment.getObjectMapper().disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); //Required for nice LocalDate marshaling
+    	environment.getObjectMapper().disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); //Required for nice Date marshaling
     	environment.getObjectMapper().setSerializationInclusion(Include.NON_NULL); //Skip nulls
 
     	//Add exception mappers
