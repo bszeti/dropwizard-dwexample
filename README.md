@@ -1,6 +1,6 @@
 # Dropwizard example
 
-An example project using the [Dropwizard Java REST framework](http://www.dropwizard.io/) (v1.1.0) showing coding practices that were used successfully in real world projects.
+An example project using the [Dropwizard Java REST framework](http://www.dropwizard.io/) (v1.1.0) showing coding practices that were used successfully in real world projects:
 - Project structure
 - GET and POST resources
 - Healthcheck with build info
@@ -8,10 +8,11 @@ An example project using the [Dropwizard Java REST framework](http://www.dropwiz
 - Custom exception mappers
 - Add default (listing) servlet to admin 
 - Scheuled task (Dropwizard managed)
-- Service manager for service running on multiple threads (Dropwizard managed)
-- ExecutorService for request processing by multiple threads
+- Service manager for a service running on multiple threads (Dropwizard managed)
+- Request response processed by multiple threads (using ListeningExecutorService)
 - Dropwizard and Jersey client
-- Async client request
+- Async client call
+- Tests using the client
 
 
 ## Related blog posts
