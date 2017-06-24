@@ -1,22 +1,18 @@
 package bszeti.dw.example.client;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.config.ConnectionConfig;
-import org.apache.http.config.SocketConfig;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.glassfish.jersey.apache.connector.ApacheClientProperties;
 import org.glassfish.jersey.apache.connector.ApacheConnectorProvider;
@@ -27,28 +23,30 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.message.DeflateEncoder;
 import org.glassfish.jersey.message.GZipEncoder;
-import org.glassfish.jersey.spi.ThreadPoolExecutorProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 
 import bszeti.dw.example.api.HelloRequest;
 import bszeti.dw.example.api.HelloResponse;
 import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.jackson.Jackson;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.setup.Environment;
+import jersey.repackaged.com.google.common.base.Function;
 import jersey.repackaged.com.google.common.util.concurrent.Futures;
-import jersey.repackaged.com.google.common.util.concurrent.UncheckedExecutionException;
+import jersey.repackaged.com.google.common.util.concurrent.ListenableFuture;
 
 /**
  * Helper class to create a client for our service. This can be used in another Java project that calls the service.
  * The client can be managed  
  */
 public class ServiceClient {
+	private static final Logger log = LoggerFactory.getLogger(ServiceClient.class);
 	private static final String NAME = "ServiceClient";
 	private Client client;
 	private WebTarget target;
@@ -74,6 +72,17 @@ public class ServiceClient {
 			client.register(HttpAuthenticationFeature.basic(config.getUsername(), config.getPassword()));
 		}
 		
+		// Here we add a custom ThreadPoolExecutor for async calls. It's usually not required.
+		// The only difference to default is using ThreadPoolExecutor.CallerRunsPolicy() instead of ThreadPoolExecutor.AbortPolicy()
+		ExecutorService asyncExecutor = environment.lifecycle()
+				.executorService("jersey-client-MyClient-%d")
+				.minThreads(config.getJerseyClientConfiguration().getMinThreads())
+				.maxThreads(config.getJerseyClientConfiguration().getMaxThreads())
+				.workQueue(new ArrayBlockingQueue<>(config.getJerseyClientConfiguration().getWorkQueueSize()))
+				.rejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy())
+				.build();
+		builder.using(asyncExecutor);		
+	
 		//Create webtarget
 		target = client.target(config.getUrl()).path(HelloRequest.HELLO_PATH);
 		
@@ -186,7 +195,7 @@ public class ServiceClient {
 		return processResponse(response);
 	}
 	
-	//Operations - Methods to call the remote http service
+	//Async request
 	public Future<HelloResponse> sayGreetingsGetAsync(String name, String lang) {
 		Future<Response> futureResponse = target
 				.path(name)
@@ -195,15 +204,22 @@ public class ServiceClient {
 				.async()
 				.get();
 		
-		//Process the Response to HelloResponse when .get() is called
+		//Process the Response to HelloResponse when .get() is called. This code is executed by the thread calling Future.get()
 		//checked exceptions are not allowed
-		return Futures.lazyTransform(futureResponse, (r)-> {
-			try {
-				return processResponse(r);
-			} catch (ServiceClientException ex) {
-				throw new UncheckedExecutionException(ex);
-			}
-		});
+		return Futures.lazyTransform(futureResponse, (r)-> processResponse(r));
+	}
+	
+	//Async request - forcing ListenableFuture, which is actually returned by Jersey async
+	public Future<HelloResponse> sayGreetingsGetAsyncListenableFuture(String name, String lang) {
+		ListenableFuture<Response> futureResponse = (ListenableFuture<Response>) target
+				.path(name)
+				.queryParam("lang", lang)
+				.request(MediaType.APPLICATION_JSON)
+				.async()
+				.get();
+		
+		//Process the Response to HelloResponse when the Future is completed successfully. The transform function is executed by the thread from the client's pool.
+		return Futures.transform(futureResponse, processResponseFunction);
 	}
 	
 	public HelloResponse sayGreetingsPost(HelloRequest request) throws ServiceClientException{
@@ -214,8 +230,18 @@ public class ServiceClient {
 		return processResponse(response);
 	}
 	
+	private static Function<Response,HelloResponse> processResponseFunction = new Function<Response,HelloResponse>(){
+
+		@Override
+		public HelloResponse apply(Response response) {
+			return processResponse(response);
+		}
+		
+	};
+	
 	//Helper method to process response and convert non-200 responses to exception
-	private HelloResponse processResponse(Response response) throws ServiceClientException{
+	private static HelloResponse processResponse(Response response) throws ServiceClientException{
+		log.info("Processing response");
 		try {
 			if (response.getStatusInfo().equals(Response.Status.OK)){
 				return response.readEntity(HelloResponse.class);

@@ -1,6 +1,6 @@
 package bszeti.dw.example.client;
 
-public class ServiceClientException extends Exception{
+public class ServiceClientException extends RuntimeException{
 	
 	private boolean recoverable = true;
 	

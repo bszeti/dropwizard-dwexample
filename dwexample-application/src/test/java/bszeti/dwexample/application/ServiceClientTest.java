@@ -7,7 +7,13 @@ import java.time.LocalDateTime;
 
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
+import org.junit.rules.TestWatcher;
+import org.junit.runner.Description;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import bszeti.dw.example.api.HelloRequest;
 import bszeti.dw.example.api.HelloResponse;
@@ -21,7 +27,8 @@ import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
 import io.dropwizard.util.Duration;
 
-public class ServiceClientTest {
+public class ServiceClientTest{
+	private static Logger log = LoggerFactory.getLogger(ServiceClientTest.class);
 	private static ServiceClient clientDropwizard;
 	private static ServiceClient clientJersey;
 
@@ -29,6 +36,14 @@ public class ServiceClientTest {
 	public static final DropwizardAppRule<DwExampleConfiguration> RULE = new DropwizardAppRule<>(
 			DwExampleApplication.class, ResourceHelpers.resourceFilePath("config-junit.yml"));
 
+	@Rule
+	public TestRule watcher = new TestWatcher() {
+	   protected void starting(Description description) {
+	      log.info(" ****** Starting test " + description.getMethodName() + " ****** ");
+	   }
+	};
+
+	
 	@BeforeClass
 	public static void beforeClass() throws Exception {
 		//Get url from app context instead of hardcoding it
@@ -81,6 +96,17 @@ public class ServiceClientTest {
 	@Test
 	public void sayGreetingGetAsync() throws Exception {
 		HelloResponse response = clientDropwizard.sayGreetingsGetAsync("TEST", "en").get();
+		HelloResponseStatus status = response.getHelloResponseStatus();
+		assertEquals(0, status.getCode().intValue());
+		assertEquals("OK", status.getMessage());
+		assertTrue(java.time.Duration.between(LocalDateTime.now(), status.getTime()).abs().getSeconds()<10);
+		assertEquals(1,response.getGreetings().size());
+		assertEquals("Hello TEST!", response.getGreetings().get("en"));
+	}
+	
+	@Test
+	public void sayGreetingGetAsyncListenableFuture() throws Exception {
+		HelloResponse response = clientDropwizard.sayGreetingsGetAsyncListenableFuture("TEST", "en").get();
 		HelloResponseStatus status = response.getHelloResponseStatus();
 		assertEquals(0, status.getCode().intValue());
 		assertEquals("OK", status.getMessage());

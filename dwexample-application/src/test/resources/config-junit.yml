@@ -18,6 +18,10 @@ logging:
   level: INFO
   loggers:
     bszeti.dropwizard.dwexample: DEBUG
+  appenders:
+   - type: console
+     logFormat: "%-5level [%date{ISO8601}] [%thread] %c{1}: %m%n"
+       
 
 tempDir: /tmp
 greetings:
